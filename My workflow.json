@@ -1,0 +1,188 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "fae06e78-eadb-4c27-bed2-7d9f550398e8",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://unshelved-sheila-tabulable.ngrok-free.dev/alert",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "bbf6c320-16e5-4ff6-9963-d55030576a46",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "09b721cc-ddb4-4c36-9cd7-f5d88b88ad69",
+              "leftValue": "={{ $json.severity }}",
+              "rightValue": "CRITICAL",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "ae4495cb-3aa9-4493-8431-32b74c25ad90",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=Network alert received:\nSite: {{ $json.site }}\nType: {{ $json.type }}\nSeverity: {{ $json.severity }}\nValue: {{ $json.value }}%\n\nAnalyze this alert and provide:\n1. What is the likely cause?\n2. What is the impact?\n3. Recommended immediate action?\nKeep it short and technical."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        624,
+        -96
+      ],
+      "id": "1f80a343-acbb-4a3d-ae26-80fc381ca9f1",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "WC2UarGHqDx8FY3J",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "708448686",
+        "text": "=🚨 Network Alert!  📍 Site: {{ $('HTTP Request').item.json.site }} ⚠️ Type: {{ $('HTTP Request').item.json.type }} 🔴 Severity: {{ $('HTTP Request').item.json.severity }} 📊 Value: {{ $('HTTP Request').item.json.value }}% 🕐 Time: {{ $('HTTP Request').item.json.timestamp }}  🤖 AI Analysis: {{ $json.output[0].content[0].text }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        976,
+        -80
+      ],
+      "id": "74a3b515-a208-449e-9101-e7e057236e7e",
+      "name": "Send a text message",
+      "webhookId": "f4a5f7e6-b531-4625-a818-c47a29fc3516",
+      "credentials": {
+        "telegramApi": {
+          "id": "ACNK0mCTOZShBBf4",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "6db243be-9afb-4364-96b4-8b75a9dc29c3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4143e91a4de26c0e74dde0aecdc72b80e4013efee6311cb7c355a000e7089917"
+  },
+  "id": "9bJreJXFEjZJAjyr",
+  "tags": []
+}
