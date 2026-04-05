@@ -34,5 +34,5 @@ def health():
 
 if __name__ == '__main__':
     tunnel = ngrok.connect(5000)
-    print(f"\n🌍 Public URL: {tunnel.public_url}/alert\n")
+    print(f"\n Public URL: {tunnel.public_url}/alert\n")
     app.run(debug=False, port=5000)
