@@ -30,7 +30,7 @@ def send_alert(alert):
     print(f"[{alert['severity']}] {alert['site']} ← {alert['type']} ({alert['value']}%)")
 
 # ── بيعمل simulate لـ alerts كل 5 ثواني ──
-print("🚀 Network Monitor Started...")
+print(" Network Monitor Started...")
 while True:
     alert = generate_alert()
     send_alert(alert)
